@@ -10,6 +10,8 @@ export default defineConfig({
   },
   build: {
     target: 'esnext',
+    outDir: 'dist',
+    assetsDir: 'assets'
   },
   base: BASE_PATH,
 })

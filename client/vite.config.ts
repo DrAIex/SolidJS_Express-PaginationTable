@@ -1,8 +1,6 @@
 import { defineConfig } from 'vite'
 import solid from 'vite-plugin-solid'
 
-const BASE_PATH = '/'
-
 export default defineConfig({
   plugins: [solid()],
   server: {
@@ -11,9 +9,8 @@ export default defineConfig({
   build: {
     target: 'esnext',
     outDir: 'dist',
-    assetsDir: 'assets',
     emptyOutDir: true,
     minify: true
   },
-  base: BASE_PATH,
+  base: '/'
 })

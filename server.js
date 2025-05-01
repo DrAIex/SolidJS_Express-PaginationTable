@@ -33,8 +33,8 @@ app.use((req, res, next) => {
 });
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'client/dist')));
-  console.log(`Serving static files from: ${path.join(__dirname, 'client/dist')}`);
+  app.use(express.static(path.join(__dirname, 'client', 'dist')));
+  console.log(`Serving static files from: ${path.join(__dirname, 'client', 'dist')}`);
 }
 
 const store = {
@@ -225,18 +225,26 @@ app.get('/api/settings', (req, res) => {
   });
 });
 
-// Обрабатываем все остальные маршруты в режиме production, отдавая index.html
+// Обслуживание статических файлов в production
 if (process.env.NODE_ENV === 'production') {
+  // Все GET запросы, которые не начинаются с /api, отправляются на index.html
   app.get('*', (req, res) => {
-    console.log(`Serving index.html for: ${req.url}`);
-    res.sendFile(path.join(__dirname, 'client/dist', 'index.html'));
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+    }
   });
 }
 
+// Запуск сервера
 app.listen(PORT, () => {
-  console.log(`Сервер запущен на порту ${PORT}`);
-  console.log(`Инициализирован массив с ${store.items.length} элементами`);
-  console.log(`Режим: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Server running on port ${PORT}`);
+  console.log(`API is available at /api/items and /api/order`);
+});
+
+// API тест
+app.get('/api/test', (req, res) => {
+  console.log('API test endpoint was called');
+  res.json({ message: 'API is working!' });
 });
 
 module.exports = app; 

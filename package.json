@@ -6,8 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "build": "cd client && npm install && npm run build",
-    "dev": "node server.js",
-    "vercel-build": "cd client && npm install && npm run build && cd .."
+    "dev": "node server.js"
   },
   "keywords": [
     "solidjs",

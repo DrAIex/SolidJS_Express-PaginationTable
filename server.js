@@ -34,6 +34,7 @@ app.use((req, res, next) => {
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'client/dist')));
+  console.log(`Serving static files from: ${path.join(__dirname, 'client/dist')}`);
 }
 
 const store = {
@@ -224,8 +225,10 @@ app.get('/api/settings', (req, res) => {
   });
 });
 
+// Обрабатываем все остальные маршруты в режиме production, отдавая index.html
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
+    console.log(`Serving index.html for: ${req.url}`);
     res.sendFile(path.join(__dirname, 'client/dist', 'index.html'));
   });
 }

@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import solid from 'vite-plugin-solid'
 
-const BASE_PATH = '/paginator/'
+const BASE_PATH = '/'
 
 export default defineConfig({
   plugins: [solid()],

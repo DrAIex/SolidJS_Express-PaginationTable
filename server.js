@@ -1,17 +1,40 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5000',
+  'https://solidjs-express-paginationtable.vercel.app', 
+  'https://draiex.github.io'
+];
+
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log(`Запрос с неразрешенного источника: ${origin}`);
+      callback(null, true);
+    }
+  },
+  credentials: true
+}));
+
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'client/dist')));
+}
 
 const store = {
   items: Array.from({ length: 1000000 }, (_, i) => ({ 
@@ -201,7 +224,16 @@ app.get('/api/settings', (req, res) => {
   });
 });
 
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client/dist', 'index.html'));
+  });
+}
+
 app.listen(PORT, () => {
   console.log(`Сервер запущен на порту ${PORT}`);
   console.log(`Инициализирован массив с ${store.items.length} элементами`);
-}); 
+  console.log(`Режим: ${process.env.NODE_ENV || 'development'}`);
+});
+
+module.exports = app; 

@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -32,10 +33,18 @@ app.use((req, res, next) => {
   next();
 });
 
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'client', 'dist')));
-  console.log(`Serving static files from: ${path.join(__dirname, 'client', 'dist')}`);
-}
+const staticPaths = [
+  path.join(__dirname, 'public'),
+  path.join(__dirname, 'client/dist'),
+  path.join(__dirname, 'client', 'dist')
+];
+
+staticPaths.forEach(staticPath => {
+  if (fs.existsSync(staticPath)) {
+    console.log(`Serving static files from: ${staticPath}`);
+    app.use(express.static(staticPath));
+  }
+});
 
 const store = {
   items: Array.from({ length: 1000000 }, (_, i) => ({ 
@@ -225,23 +234,26 @@ app.get('/api/settings', (req, res) => {
   });
 });
 
-// Обслуживание статических файлов в production
-if (process.env.NODE_ENV === 'production') {
-  // Все GET запросы, которые не начинаются с /api, отправляются на index.html
-  app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
-      res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    for (const staticPath of staticPaths) {
+      const indexPath = path.join(staticPath, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        console.log(`Serving SPA from: ${indexPath}`);
+        return res.sendFile(indexPath);
+      }
     }
-  });
-}
+    
+    console.log(`Не удалось найти index.html для запроса: ${req.url}`);
+    return res.status(404).send('Not found');
+  }
+});
 
-// Запуск сервера
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`API is available at /api/items and /api/order`);
 });
 
-// API тест
 app.get('/api/test', (req, res) => {
   console.log('API test endpoint was called');
   res.json({ message: 'API is working!' });

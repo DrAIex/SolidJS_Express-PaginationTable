@@ -249,10 +249,12 @@ app.get('*', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`API is available at /api/items and /api/order`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`API is available at /api/items and /api/order`);
+  });
+}
 
 app.get('/api/test', (req, res) => {
   console.log('API test endpoint was called');
